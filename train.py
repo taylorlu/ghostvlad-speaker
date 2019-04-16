@@ -33,16 +33,26 @@ def main(argv):
     with graph.as_default():
 
         ghostvlad_model = model.GhostVLADModel(argv)
-        ghostvlad_model.init_inference(is_training=True)
+        ghostvlad_model.init_inference(is_training=False)
         ghostvlad_model.init_cost()
-        ghostvlad_model.init_train()
 
         sess_conf = tf.ConfigProto(allow_soft_placement=True)
         with tf.Session(config=sess_conf) as sess:
+            restore_vars = []
+            train_vars = []
+            for var in tf.global_variables():
+                if(var.name.startswith('arcface/')):
+                    train_vars.append(var)
+                else:
+                    if(not 'Adam' in var.name):
+                        restore_vars.append(var)
+
+            ghostvlad_model.init_train(train_vars)
             sess.run(tf.global_variables_initializer())
-            saver = tf.train.Saver()
+
             if restore_path:
-                saver.restore(sess, os.path.join(restore_path, "data.ckpt"))
+                saver = tf.train.Saver(restore_vars)
+                saver.restore(sess, restore_path)
 
             print("Begin training...")
             for e in range(argv['epochs']):
@@ -59,6 +69,7 @@ if __name__=="__main__":
         "min_duration": 600,
         "max_duration": 2500,
         "save_path": r"saver",
+        "restore_path": r"ckpt/model.ckpt",
 
         "batch_size": 64,
         "epochs": 1000,

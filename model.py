@@ -187,13 +187,13 @@ class GhostVLADModel(object):
         self._init_cost = True
 
 
-    def init_train(self):
+    def init_train(self, train_vars=None):
         self._global_step = tf.Variable(0, name='global_step', trainable=False)
         self._lr = tf.train.exponential_decay(self.init_learning_rate, self._global_step,
                     self.decay_steps, self.decay_rate, staircase=True)
 
         optimizer = tf.train.AdamOptimizer(self._lr)
-        grads, tvars= zip(*optimizer.compute_gradients(self._cost))
+        grads, tvars= zip(*optimizer.compute_gradients(self._cost, train_vars))
         grads_clip, _ = tf.clip_by_global_norm(grads, self.max_grad_norm)
         self._train_op= optimizer.apply_gradients(zip(grads_clip, tvars), global_step=self._global_step)
         self._init_train = True
