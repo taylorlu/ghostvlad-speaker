@@ -14,6 +14,8 @@ import io
 def load_m4a(vid_path, sr):
     audio = AudioSegment.from_file(vid_path, "mp4")
     audio = audio.set_frame_rate(sr)
+    audio = audio.set_channels(1)
+    audio = audio.set_sample_width(2)
     buf = io.BytesIO()
     audio.export(buf, format='s16le')
     wav = np.frombuffer(buf.getbuffer(), np.int16)
@@ -52,7 +54,7 @@ def load_data(path, sr=16000, win_length=400, hop_length=160, n_fft=512, rand_du
             print("!!! Not supported audio format.")
             return None
     except Exception as e:
-        print("Exception happened when load_data({}): {}".format(path, str(e)))
+        print("Exception happened when load_data('{}'): {}".format(path, str(e)))
         return None
 
     linear_spect = lin_spectogram_from_wav(wav, hop_length, win_length, n_fft)

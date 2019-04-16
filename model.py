@@ -188,7 +188,7 @@ class GhostVLADModel(object):
 
 
     def init_train(self):
-        self._global_step = tf.Variable(0, trainable=False)
+        self._global_step = tf.Variable(0, name='global_step', trainable=False)
         self._lr = tf.train.exponential_decay(self.init_learning_rate, self._global_step,
                     self.decay_steps, self.decay_rate, staircase=True)
 
