@@ -33,7 +33,7 @@ def main(argv):
     with graph.as_default():
 
         ghostvlad_model = model.GhostVLADModel(argv)
-        ghostvlad_model.init_inference(is_training=False)
+        ghostvlad_model.init_inference(is_training=True)
         ghostvlad_model.init_cost()
 
         sess_conf = tf.ConfigProto(allow_soft_placement=True)
@@ -47,12 +47,13 @@ def main(argv):
                     if(not 'Adam' in var.name):
                         restore_vars.append(var)
 
-            ghostvlad_model.init_train(train_vars)
+            ghostvlad_model.init_train()
             sess.run(tf.global_variables_initializer())
 
             if restore_path:
                 saver = tf.train.Saver(restore_vars)
                 saver.restore(sess, restore_path)
+            saver = tf.train.Saver()
 
             print("Begin training...")
             for e in range(argv['epochs']):
