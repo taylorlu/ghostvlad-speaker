@@ -13,7 +13,7 @@ def run_epoch(epoch, ghostvlad_model, producer, sess, save_path, saver):
         feed_dict = ghostvlad_model.feed_dict(inputs, labels)
         cost, lr, step, _ = sess.run(ops, feed_dict)
 
-        if step%1000 == 0:
+        if(step%1000==0):
             saver.save(sess, save_path)
 
         print('Epoch {}, iter {}: Cost= {:.2f}, lr= {:.2e}'.format(epoch, step, cost, lr))
@@ -69,7 +69,7 @@ if __name__=="__main__":
         "sample_rate": 16000,
         "min_duration": 600,
         "max_duration": 2500,
-        "save_path": r"saver",
+        "save_path": r"saver/model.ckpt",
         "restore_path": r"ckpt/model.ckpt",
 
         "batch_size": 64,
