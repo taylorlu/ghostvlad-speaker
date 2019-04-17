@@ -65,7 +65,7 @@ def load_data(path, sr=16000, win_length=400, hop_length=160, n_fft=512, rand_du
 
     if(is_training):
         randSpec = rand_duration//(1000//(sr//hop_length))  # random duration in spectrum
-        if(randSpec>time): # wav is too short, use the whole wav.
+        if(randSpec>=time): # wav is too short, use the whole wav.
             spec_mag = mag_T
         else:
             randStart = np.random.randint(0, time-randSpec)
