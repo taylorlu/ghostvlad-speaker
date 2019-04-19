@@ -36,7 +36,14 @@ def main(argv):
         ghostvlad_model.init_inference(is_training=True)
         ghostvlad_model.init_cost()
 
-        sess_conf = tf.ConfigProto(allow_soft_placement=True)
+        os.environ['OMP_NUM_THREADS'] = '32'
+        os.environ['KMP_BLOCKTIME'] = '0'
+        os.environ["KMP_SETTINGS"] = '0'
+        os.environ['KMP_AFFINITY'] = 'granularity=fine,compact,1,0'
+        sess_conf = tf.ConfigProto()
+        sess_conf.inter_op_parallelism_threads = 1
+        sess_conf.intra_op_parallelism_threads = 32
+
         with tf.Session(config=sess_conf) as sess:
             restore_vars = []
             train_vars = []
@@ -47,7 +54,7 @@ def main(argv):
                     if(not 'Adam' in var.name):
                         restore_vars.append(var)
 
-            ghostvlad_model.init_train()
+            ghostvlad_model.init_train(train_vars)
             sess.run(tf.global_variables_initializer())
 
             if restore_path:
@@ -67,12 +74,12 @@ if __name__=="__main__":
     args_params = {
         "json_path": r"vox.json",
         "sample_rate": 16000,
-        "min_duration": 600,
-        "max_duration": 2500,
+        "min_duration": 1000,
+        "max_duration": 3000,
         "save_path": r"saver/model.ckpt",
         "restore_path": r"ckpt/model.ckpt",
 
-        "batch_size": 64,
+        "batch_size": 256,
         "epochs": 1000,
         "learning_rate": 0.001,
         "max_grad_norm": 50,

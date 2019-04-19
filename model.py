@@ -192,10 +192,12 @@ class GhostVLADModel(object):
         self._lr = tf.train.exponential_decay(self.init_learning_rate, self._global_step,
                     self.decay_steps, self.decay_rate, staircase=True)
 
-        optimizer = tf.train.AdamOptimizer(self._lr)
-        grads, tvars= zip(*optimizer.compute_gradients(self._cost, train_vars))
-        grads_clip, _ = tf.clip_by_global_norm(grads, self.max_grad_norm)
-        self._train_op= optimizer.apply_gradients(zip(grads_clip, tvars), global_step=self._global_step)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            optimizer = tf.train.AdamOptimizer(self._lr)
+            grads, tvars = zip(*optimizer.compute_gradients(self._cost, train_vars))
+            grads_clip, _ = tf.clip_by_global_norm(grads, self.max_grad_norm)
+            self._train_op = optimizer.apply_gradients(zip(grads_clip, tvars), global_step=self._global_step)
         self._init_train = True
 
 

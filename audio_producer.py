@@ -140,7 +140,7 @@ class AudioProducer(object):
             producer.put((np.array(inputs), labels))
 
 
-    def iterator(self, max_size=50, num_workers=3):
+    def iterator(self, max_size=500, num_workers=10):
         random.shuffle(self.data)
         batches = [self.data[i:i+self.batch_size]
                    for i in range(0, len(self.data) - self.batch_size + 1, self.batch_size)]
