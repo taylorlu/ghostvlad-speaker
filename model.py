@@ -97,7 +97,6 @@ class GhostVLADModel(object):
                                     regularizer=self.l2_regularizer,
                                     trainable=trainable)
 
-            embeddings = tf.nn.l2_normalize(embeddings, axis=1)
             weights = tf.nn.l2_normalize(weights, axis=0)
 
             cos_m = math.cos(m)
@@ -161,8 +160,7 @@ class GhostVLADModel(object):
                            bias_regularizer=self.l2_regularizer,
                            name='fc6')
 
-        if(not trainable):
-            embeddings = tf.nn.l2_normalize(embeddings, 1)
+        embeddings = tf.nn.l2_normalize(embeddings, 1)
 
         return embeddings
 

@@ -23,7 +23,11 @@ def identity_block_2D(input_tensor, kernel_size, filters, stage, block, trainabl
                         use_bias=False,
                         trainable=trainable,
                         kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
-        x = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')(x, training=trainable)
+        bn_op = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')
+        x = bn_op(x, training=trainable)
+        if(trainable):
+            for operation in bn_op.updates:
+                tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, operation)
 
     with tf.variable_scope('activation'):
         x = tf.nn.relu(x)
@@ -36,7 +40,11 @@ def identity_block_2D(input_tensor, kernel_size, filters, stage, block, trainabl
                         use_bias=False,
                         trainable=trainable,
                         kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
-        x = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')(x, training=trainable)
+        bn_op = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')
+        x = bn_op(x, training=trainable)
+        if(trainable):
+            for operation in bn_op.updates:
+                tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, operation)
 
     with tf.variable_scope('activation'):
         x = tf.nn.relu(x)
@@ -48,7 +56,11 @@ def identity_block_2D(input_tensor, kernel_size, filters, stage, block, trainabl
                         use_bias=False,
                         trainable=trainable,
                         kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
-        x = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')(x, training=trainable)
+        bn_op = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')
+        x = bn_op(x, training=trainable)
+        if(trainable):
+            for operation in bn_op.updates:
+                tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, operation)
 
     with tf.variable_scope('add'):
         x = x + input_tensor
@@ -80,7 +92,11 @@ def conv_block_2D(input_tensor, kernel_size, filters, stage, block, strides=(2, 
                         use_bias=False,
                         trainable=trainable,
                         kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
-        x = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')(x, training=trainable)
+        bn_op = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')
+        x = bn_op(x, training=trainable)
+        if(trainable):
+            for operation in bn_op.updates:
+                tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, operation)
 
     with tf.variable_scope('activation'):
         x = tf.nn.relu(x)
@@ -92,7 +108,11 @@ def conv_block_2D(input_tensor, kernel_size, filters, stage, block, strides=(2, 
                         use_bias=False,
                         trainable=trainable,
                         kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
-        x = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')(x, training=trainable)
+        bn_op = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')
+        x = bn_op(x, training=trainable)
+        if(trainable):
+            for operation in bn_op.updates:
+                tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, operation)
 
     with tf.variable_scope('activation'):
         x = tf.nn.relu(x)
@@ -104,7 +124,11 @@ def conv_block_2D(input_tensor, kernel_size, filters, stage, block, strides=(2, 
                         use_bias=False,
                         trainable=trainable,
                         kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
-        x = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')(x, training=trainable)
+        bn_op = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')
+        x = bn_op(x, training=trainable)
+        if(trainable):
+            for operation in bn_op.updates:
+                tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, operation)
 
     conv_name_4 = 'conv' + str(stage) + '_' + str(block) + '_1x1_proj'
     with tf.variable_scope(conv_name_4) as scope:
@@ -113,7 +137,11 @@ def conv_block_2D(input_tensor, kernel_size, filters, stage, block, strides=(2, 
                         use_bias=False,
                         trainable=trainable,
                         kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay))
-        shortcut = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')(shortcut, training=trainable)
+        bn_op = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')
+        shortcut = bn_op(shortcut, training=trainable)
+        if(trainable):
+            for operation in bn_op.updates:
+                tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, operation)
 
     with tf.variable_scope('add'):
         x = x + shortcut
@@ -134,7 +162,11 @@ def resnet_2D_v1(inputs, trainable=True):
                         trainable=trainable,
                         kernel_regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
                         padding='same')
-        x1 = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')(x1, training=trainable)
+        bn_op = tf.keras.layers.BatchNormalization(axis=bn_axis, name='bn')
+        x1 = bn_op(x1, training=trainable)
+        if(trainable):
+            for operation in bn_op.updates:
+                tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, operation)
 
     x1 = tf.nn.relu(x1)
     x1 = tf.layers.max_pooling2d(x1, [2, 2], [2, 2])
