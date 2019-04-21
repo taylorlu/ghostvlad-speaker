@@ -2,6 +2,7 @@ import tensorflow as tf
 import backbone
 import math
 import numpy as np
+from module import conv1d_banks, conv1d, normalize, highwaynet
 
 def assignValue(graph): # restore from pb
     g1=tf.Graph()
@@ -123,12 +124,33 @@ class GhostVLADModel(object):
         # ===============================================
         #                   parameters
         # ===============================================
-        x = backbone.resnet_2D_v1(inputs, trainable=trainable)
+        num_highway = 2
+        norm_type = "ins"
+        hidden_units = 512
+        num_banks = 8
+        inputs = tf.transpose(inputs[:,:,:,0], perm=[0, 2, 1])
+
+        x = conv1d(inputs, hidden_units, 1, scope="conv1d")
+
+        out = conv1d_banks(x, K=num_banks, num_units=hidden_units, norm_type=norm_type,
+                           is_training=trainable)  # (n, t, k * h)
+
+        out = tf.layers.max_pooling1d(out, 2, 1, padding="same")  # (n, t, k * h)
+
+        out = conv1d(out, hidden_units, 3, scope="conv1d_1")  # (n, t, h)
+        out = normalize(out, type=norm_type, is_training=trainable, activation_fn=tf.nn.relu)
+        out = conv1d(out, hidden_units, 3, scope="conv1d_2")  # (n, t, h)
+
+        out += x  # (n, t, h) # residual connections
+
+        for i in range(num_highway):
+            out = highwaynet(out, num_units=hidden_units, scope='highwaynet_{}'.format(i))  # (n, t, h)
+        x = tf.keras.backend.expand_dims(out, 1)
 
         # ===============================================
         #            Fully Connected Block 1
         # ===============================================
-        x_fc = tf.layers.conv2d(x, self.embedding_dim, [7, 1],
+        x_fc = tf.layers.conv2d(x, self.embedding_dim, [1, 1],
                         strides=[1, 1],
                         activation='relu',
                         kernel_initializer=tf.orthogonal_initializer(),
@@ -140,7 +162,7 @@ class GhostVLADModel(object):
         # ===============================================
         #            Feature Aggregation
         # ===============================================
-        x_k_center = tf.layers.conv2d(x, self.vlad_clusters+self.ghost_clusters, [7, 1],
+        x_k_center = tf.layers.conv2d(x, self.vlad_clusters+self.ghost_clusters, [1, 1],
                                     strides=[1, 1],
                                     kernel_initializer=tf.orthogonal_initializer(),
                                     use_bias=True, trainable=trainable,
