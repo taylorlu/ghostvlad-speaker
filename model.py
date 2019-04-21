@@ -85,8 +85,7 @@ class GhostVLADModel(object):
 
             cluster_res = cluster_res[:, :self.vlad_clusters, :]
 
-            cluster_l2 = tf.nn.l2_normalize(cluster_res, -1)
-            outputs = tf.reshape(cluster_l2, [-1, int(self.vlad_clusters) * int(num_features)])
+            outputs = tf.reshape(cluster_res, [-1, int(self.vlad_clusters) * int(num_features)])
         return outputs
 
 
@@ -126,7 +125,7 @@ class GhostVLADModel(object):
         # ===============================================
         num_highway = 2
         norm_type = "ins"
-        hidden_units = 512
+        hidden_units = 256
         num_banks = 8
         inputs = tf.transpose(inputs[:,:,:,0], perm=[0, 2, 1])
 
@@ -152,7 +151,6 @@ class GhostVLADModel(object):
         # ===============================================
         x_fc = tf.layers.conv2d(x, self.embedding_dim, [1, 1],
                         strides=[1, 1],
-                        activation='relu',
                         kernel_initializer=tf.orthogonal_initializer(),
                         use_bias=True, trainable=trainable,
                         kernel_regularizer=self.l2_regularizer,
