@@ -1,5 +1,4 @@
 import tensorflow as tf
-import backbone
 import math
 import numpy as np
 from module import conv1d_banks, conv1d, normalize, highwaynet
@@ -87,6 +86,26 @@ class GhostVLADModel(object):
 
             outputs = tf.reshape(cluster_res, [-1, int(self.vlad_clusters) * int(num_features)])
         return outputs
+
+    def amsoftmax_loss(self, embeddings, labels, s=30.0, m=0.35, trainable=True):
+        with tf.variable_scope('amsoftmax'):
+            weights = tf.get_variable(name='weights',
+                                    shape=[embeddings.get_shape().as_list()[-1], self.num_class], dtype=tf.float32,
+                                    initializer=tf.contrib.layers.xavier_initializer(uniform=False),
+                                    regularizer=self.l2_regularizer,
+                                    trainable=trainable)
+
+            weights = tf.nn.l2_normalize(weights, axis=0)
+            y_pred = tf.matmul(embeddings, weights)
+
+            batch_range = tf.reshape(tf.range(tf.shape(y_pred)[0]),shape=(-1,1)) # 0~batchsize-1
+            indices_of_groundtruth = tf.concat([batch_range, tf.reshape(labels,shape=(-1,1))], axis=1) # 2columns vector, 0~batchsize-1 and label
+            groundtruth_score = tf.gather_nd(y_pred, indices_of_groundtruth) # score of groundtruth
+
+            added_margin = tf.cast(tf.greater(groundtruth_score,m),dtype=tf.float32)*m # if groundtruth_score>m, groundtruth_score-m
+            added_margin = tf.reshape(added_margin,shape=(-1,1))
+            logits = tf.subtract(y_pred, tf.one_hot(labels, self.num_class)*added_margin)*s # s(cos_theta_yi-m), s(cos_theta_j)
+            return logits
 
 
     def get_arcface_logits(self, embeddings, labels, s=50.0, m=0.5, trainable=True):
